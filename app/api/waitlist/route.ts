@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
+  console.log('SUPABASE_URL set:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('SERVICE_KEY set:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -18,12 +20,13 @@ export async function POST(request: Request) {
     .insert({ email: email.toLowerCase().trim() });
 
   if (error) {
+    console.error('Supabase insert error:', JSON.stringify(error));
     if (error.code === '23505') {
-      // Duplicate email — treat as success so we don't leak info
       return NextResponse.json({ success: true });
     }
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 });
   }
+  console.log('Inserted email:', email);
 
   return NextResponse.json({ success: true });
 }
